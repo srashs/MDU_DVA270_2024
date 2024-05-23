@@ -38,9 +38,8 @@ int main(void)
 
 	start_gpio();
 
-	char CLEAR[] = CLEAR_SCREEN;
-
 	start_app();
+	
 	nrfx_systick_delay_ms(500);
 
 	uarte_write(end, sizeof(end));
