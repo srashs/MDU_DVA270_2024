@@ -25,11 +25,6 @@ uint8_t uarte_buffer;
 
 int main(void)
 {
-
-	uint8_t input_text[size_input_text];
-	memset(input_text, '\0', sizeof(input_text));
-
-	uint8_t run = 1;
 	uint8_t end[] = "The program is close.";
 
 	// Vi kör med default settings och anger våra TX och RX pinnar:
@@ -44,36 +39,9 @@ int main(void)
 	start_gpio();
 
 	char CLEAR[] = CLEAR_SCREEN;
-	uint8_t please [] = "Please enter a number:" ;
-	while (run)
-	{
 
-		int switch_input = 0;
-		uarte_write(please, sizeof(please));
-		read_string(input_text);
-		switch_input = read_int(input_text);
-
-		switch (switch_input)
-		{
-		case 1:
-			break;
-		case 2:
-			break;
-		case 3:
-			break;
-		case 4:
-			test_text();
-			break;
-		case 5:
-			run = 0; // exit
-			break;
-		default:
-			break;
-		}
-		uarte_buffer = 0;
-
-		nrfx_systick_delay_ms(500);
-	}
+	start_app();
+	nrfx_systick_delay_ms(500);
 
 	uarte_write(end, sizeof(end));
 }

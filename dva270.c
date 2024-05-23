@@ -10,7 +10,8 @@ static nrfx_uarte_t instance = NRFX_UARTE_INSTANCE(0); // Den behövs i .h filen
 void uarte_write(uint8_t *data, uint8_t length)
 {
 	nrfx_uarte_tx(&instance, data, length, 0);
-	while(nrfx_uarte_tx_in_progress(&instance));
+	while (nrfx_uarte_tx_in_progress(&instance))
+		;
 }
 
 void read_string(uint8_t input[])
@@ -64,6 +65,107 @@ void newline(void)
 
 void test_text(void)
 {
-	uint8_t test[]="\n\rThis is a test\n\r";
-	uarte_write(test,sizeof(test));
+	uint8_t test[] = "\n\rThis is a test\n\r";
+	uarte_write(test, sizeof(test));
+}
+
+void start_app()
+{
+
+	uint8_t input_text[size_input_text];
+	memset(input_text, '\0', sizeof(input_text));
+
+	uint8_t run = 1;
+
+	uint8_t msgT1[] = "Skriv 5 to avsluta \n\r Skriv vilken LED ska tändas (Led 1 - Led 4.) \n\r";
+	uint8_t msgT2[] = "Skriv hur många sekunder ska den tändas: \n\r";
+
+	// msg som skrivs vid on/off
+	uint8_t msg1[] = "Led 1\n\r";
+	uint8_t msg2[] = "Led 2\n\r";
+	uint8_t msg3[] = "Led 3\n\r";
+	uint8_t msg4[] = "Led 4\n\r";
+	while (run)
+	{
+
+		uint8_t switch_input = 0;
+
+		while (switch_input > 5 || switch_input < 1)
+		{
+			nrfx_uarte_tx(&instance, msgT1, sizeof(msgT1), 0);
+			read_string(input_text);
+			switch_input = read_int(input_text);
+		}
+		if (switch_input == 5) run=0;
+		if (switch_input != 5)
+		{
+			nrfx_uarte_tx(&instance, msgT2, sizeof(msgT2), 0);
+			read_string(input_text);
+			uint32_t input_time = read_int(input_text);
+			uint32_t delay = input_time * 1000; // input time * 1000 because the time is in milliseconds
+
+			switch (switch_input)
+			{
+
+			case 1:
+				nrfx_uarte_tx(&instance, msg1, sizeof(msg1), 0);
+				while (delay > 10)
+				{
+
+					nrf_gpio_pin_toggle(LED1);
+					nrfx_systick_delay_ms(delay);
+					nrf_gpio_pin_toggle(LED1);
+					nrfx_systick_delay_ms(delay);
+					delay = delay / 2;
+					switch_input = 0;
+				}
+				break;
+
+			case 2:
+				nrfx_uarte_tx(&instance, msg2, sizeof(msg2), 0);
+				while (delay > 10)
+				{
+
+					nrf_gpio_pin_toggle(LED2);
+					nrfx_systick_delay_ms(delay);
+					nrf_gpio_pin_toggle(LED2);
+					nrfx_systick_delay_ms(delay);
+					delay = delay / 2;
+					switch_input = 0;
+				}
+				break;
+
+			case 3:
+				nrfx_uarte_tx(&instance, msg3, sizeof(msg3), 0);
+				while (delay > 10)
+				{
+
+					nrf_gpio_pin_toggle(LED3);
+					nrfx_systick_delay_ms(delay);
+					nrf_gpio_pin_toggle(LED3);
+					nrfx_systick_delay_ms(delay);
+					delay = delay / 2;
+					switch_input = 0;
+				}
+				break;
+
+			case 4:
+				nrfx_uarte_tx(&instance, msg4, sizeof(msg4), 0);
+				while (delay > 10)
+				{
+
+					nrf_gpio_pin_toggle(LED4);
+					nrfx_systick_delay_ms(delay);
+					nrf_gpio_pin_toggle(LED4);
+					nrfx_systick_delay_ms(delay);
+					delay = delay / 2;
+					switch_input = 0;
+				}
+				break;
+
+			default:
+				break;
+			}
+		}
+	}
 }
