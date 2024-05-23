@@ -54,6 +54,7 @@ uint32_t read_int(uint8_t input[]);
 void start_gpio();
 void newline(void);
 void test_text(void);
+void start_app(void);
 
 
 #endif
