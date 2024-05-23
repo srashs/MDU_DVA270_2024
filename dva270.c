@@ -10,7 +10,8 @@ static nrfx_uarte_t instance = NRFX_UARTE_INSTANCE(0); // Den behövs i .h filen
 void uarte_write(uint8_t *data, uint8_t length)
 {
 	nrfx_uarte_tx(&instance, data, length, 0);
-	while(nrfx_uarte_tx_in_progress(&instance));
+	while (nrfx_uarte_tx_in_progress(&instance))
+		;
 }
 
 void read_string(uint8_t input[])
@@ -64,6 +65,44 @@ void newline(void)
 
 void test_text(void)
 {
-	uint8_t test[]="\n\rThis is a test\n\r";
-	uarte_write(test,sizeof(test));
+	uint8_t test[] = "\n\rThis is a test\n\r";
+	uarte_write(test, sizeof(test));
+}
+
+void start_app(void)
+{
+	uint8_t run = 1;
+	uint8_t input_text[size_input_text];
+	uint8_t msg1[] = "\n\r Skriv in nummer avsluta med Enter\n\r Max 10 sekunder. skriv 11 för att avsluta.(tar emot en sträng). \r\n";
+	uint8_t msg_error[] = "\n\rDin input är mer än MAX värde.\n\r";
+	uint8_t msg_Delay[] = "\n\r Det har nu gått";
+	uint8_t time;
+
+	while (run)
+	{
+
+		memset(input_text, '\0', sizeof(input_text));
+		int switch_input = 0;
+		time = 0;
+		nrfx_uarte_tx(&instance, msg1, sizeof(msg1), 0);
+
+		read_string(input_text);
+		time = read_int(input_text);
+		if (time > 11)
+		{
+			nrfx_uarte_tx(&instance, msg_error, sizeof(msg_error), 0);
+		}
+		else if (time == 11)
+			run = 0;
+		else
+		{
+			nrfx_systick_delay_ms(time * 1000);
+			nrfx_uarte_tx(&instance, msg_Delay, sizeof(msg_Delay), 0);
+
+			char msg_Delay2[100];
+			memset(msg_Delay2, '\0', sizeof(msg_Delay2));
+			sprintf(msg_Delay2, " %d sekunder.\n\r", time);
+			nrfx_uarte_tx(&instance, msg_Delay2, sizeof(msg_Delay2), 0);
+		}
+	}
 }
